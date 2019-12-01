@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-from math import trunc
 
 def div_fuel(d):
-    return trunc(d/3-2)
+    return d//3-2
 
 def main():
     r = []
