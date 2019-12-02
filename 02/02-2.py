@@ -61,16 +61,9 @@ def main():
     res2 = "2,3,0,6,99"
     res3 = "2,4,4,5,99,9801"
     res4 = "30,1,1,4,2,5,6,0,99"
-
-    for test in ['ex1', 'ex2', 'ex3', 'ex4']:
-        if test == 'ex1':
-            t1(ex1, res1)
-        elif test == 'ex2':
-            t1(ex2, res2)
-        elif test == 'ex3':
-            t1(ex3, res3)
-        elif test == 'ex4':        
-            t1(ex4, res4)
+    for (test, expected) in [(ex1, res1), (ex2, res2), (ex3, res3), (ex4, res4)]:
+        t1(test, expected)
+    
     for i in range(0, 99):
         for j in range(0, 99):
             start_list = get_input()
