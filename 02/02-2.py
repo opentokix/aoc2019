@@ -27,7 +27,7 @@ def calc(l, pos):
 
 def run_program(l):
     for i in range(0, len(l), 4):
-        wip, op = calc(wip, i)
+        wip, _ = calc(wip, i)
 
 def test_list(l, noun=None, verb=None):
     if noun != None:
