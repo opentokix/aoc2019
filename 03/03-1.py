@@ -4,35 +4,37 @@ import scipy.misc as smp
 from PIL import Image
 
 size = 24000
-global blue
-blue = [0,0,254]
-global red
-red = [254,0,0]
 global white
-white = [255, 255, 255]
+white = np.asarray([255, 255, 255], dtype=np.uint8)
+global black
+black = np.asarray([0, 0, 0], dtype=np.uint8)
+
 global canvas
 canvas = np.zeros((size+1, size+1, 3), dtype=np.uint8)
-black = np.zeros((1,1, 3), dtype=np.uint8)
 
-colors = {1: [200,50,50],
-          2: [50,50,200],
-          3: [50,200,50],
-          4: [0,50,200],
-          5: [0,50,250],
-          6: [50,50,50],
-          7: [100,50,50],
-          8: [150,50,50]}
+
+colors = {1: np.asarray([200,50,50], dtype=np.uint8),
+          2: np.asarray([75,75,200], dtype=np.uint8),
+          3: np.asarray([50,200,50], dtype=np.uint8),
+          4: np.asarray([10,50,200], dtype=np.uint8),
+          5: np.asarray([10,50,250], dtype=np.uint8),
+          6: np.asarray([50,50,50], dtype=np.uint8),
+          7: np.asarray([100,50,50], dtype=np.uint8),
+          8: np.asarray([150,50,50], dtype=np.uint8)}
+
 
 
 def insert_pixel(x, y, color):
     canvas[x, y] = color
 
-def check_pixel(x, y, color):
+def check_pixel(x, y, c):
     if canvas[x, y].all() == black.all():
         return True
-    elif canvas[x, y].all() == all(color):
+    if canvas[x, y].all() == c.all():    
         return True
     else:
+        print("canvas: ", canvas[x, y], "color: ", c)
+        print("intersect")
         return False
 
 def up(steps, pos, color):
@@ -94,7 +96,7 @@ def main():
         print("working...")
         line_num = 1
         while line:
-            print(line_num)
+            print("parsing line: ", line_num)
             l = line.split(',')
             pos = [size//2,size//2]
             for i in l:
@@ -104,6 +106,7 @@ def main():
             line_num += 1
             pos = [size//2, size//2]
             line = f.readline()
+    print("Writing image file, might take some time...")
     Image.fromarray(canvas, mode='RGB').save('pic1.png')
 
 if __name__ == '__main__':
