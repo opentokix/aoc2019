@@ -118,6 +118,7 @@ def render_file(in_file, expected=None, img=None):
         print(expected)
     if img:
         Image.fromarray(canvas, mode='RGB').save(img)
+
 def grey_checkers():
     for x in range(0, size, 2):
         for y in range(0, size, 2):
@@ -141,7 +142,7 @@ def main():
     render_file("test2", 135, 'test2.png')    
     """
     dists.clear()
-    render_file("input", 'pic1.png')
+    render_file("input", img='pic1.png')
     
 if __name__ == '__main__':
     main()
