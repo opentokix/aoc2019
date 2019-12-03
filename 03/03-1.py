@@ -2,8 +2,8 @@
 import numpy as np
 import scipy.misc as smp
 from PIL import Image
-
 size = 24000
+dists = []
 global white
 white = np.asarray([255, 255, 255], dtype=np.uint8)
 global black
@@ -22,25 +22,27 @@ colors = {1: np.asarray([200,50,50], dtype=np.uint8),
           7: np.asarray([100,50,50], dtype=np.uint8),
           8: np.asarray([150,50,50], dtype=np.uint8)}
 
-
+def calc_manhattan(x, y):
+    c_x = size//2
+    c_y = size//2
+    return int(abs(c_x-x) + abs(c_y-y))
 
 def insert_pixel(x, y, color):
     canvas[x, y] = color
 
 def check_pixel(x, y, c):
-    if canvas[x, y].all() == black.all():
+    if np.array_equal(canvas[x, y], black):
         return True
-    if canvas[x, y].all() == c.all():    
+    elif np.array_equal(canvas[x, y], c):
         return True
     else:
-        print("canvas: ", canvas[x, y], "color: ", c)
-        print("intersect")
+        dists.append(calc_manhattan(x, y))
         return False
 
 def up(steps, pos, color):
-    i = 1
-    for i in range(1, steps):
-        if check_pixel(pos[0],pos[1]+i, color):
+    i = 0
+    for i in range(0, steps+1):
+        if check_pixel(pos[0], pos[1]+i, color):
             insert_pixel(pos[0], pos[1]+i, color)
         else:
             insert_pixel(pos[0], pos[1]+i, white)
@@ -48,9 +50,9 @@ def up(steps, pos, color):
     return r
 
 def down(steps, pos, color):
-    i = 1
-    for i in range(1, steps):
-        if check_pixel(pos[0],pos[1]-i, color):
+    i = 0
+    for i in range(0, steps+1):
+        if check_pixel(pos[0], pos[1]-i, color):
             insert_pixel(pos[0], pos[1]-i, color)
         else:
             insert_pixel(pos[0], pos[1]-i, white)
@@ -58,8 +60,8 @@ def down(steps, pos, color):
     return r
 
 def left(steps, pos, color):
-    i = 1 
-    for i in range(1, steps):
+    i = 0
+    for i in range(0, steps+1):
         if check_pixel(pos[0]-i,pos[1], color):
             insert_pixel(pos[0]-i, pos[1], color)
         else:
@@ -68,8 +70,8 @@ def left(steps, pos, color):
     return r
 
 def right(steps, pos, color):
-    i = 1
-    for i in range(1, steps):
+    i = 0
+    for i in range(0, steps+1):
         if check_pixel(pos[0]+i,pos[1], color):
             insert_pixel(pos[0]+i, pos[1], color)
         else:
@@ -80,23 +82,21 @@ def right(steps, pos, color):
 def draw_line(direction, steps, pos, color):
     if direction == 'U':
         pos = up(steps, pos, color)
-    if direction == 'D':
+    elif direction == 'D':
         pos = down(steps, pos, color)
-    if direction == 'L':
+    elif direction == 'L':
         pos = left(steps, pos, color)
-    if direction == 'R':
+    elif direction == 'R':
         pos = right(steps, pos, color)
+    else:
+        print("Unknown direction")
     return pos
 
-def main():
-    f = open("input","r")
-    
-    with open("input") as f:
+def render_file(in_file, expected=None, img=None):
+    with open(in_file) as f:
         line = f.readline()
-        print("working...")
         line_num = 1
         while line:
-            print("parsing line: ", line_num)
             l = line.split(',')
             pos = [size//2,size//2]
             for i in l:
@@ -106,8 +106,24 @@ def main():
             line_num += 1
             pos = [size//2, size//2]
             line = f.readline()
-    print("Writing image file, might take some time...")
-    Image.fromarray(canvas, mode='RGB').save('pic1.png')
+    numbers = list(filter(lambda num: num != 0, dists))
+    numbers.sort()
+    print("file: ", in_file, "result: ", min(numbers))
+    del numbers
+    if expected:
+        print(expected)
+    if img:
+        Image.fromarray(canvas, mode='RGB').save(img)
 
+def main():
+
+    render_file("test0", 6, 'test0.png')
+"""    dists.clear()
+    render_file("test1", 159, 'test1.png')
+    dists.clear()
+    render_file("test2", 135, 'test2.png')    
+    dists.clear()
+    render_file("input", 'pic1.png')
+"""
 if __name__ == '__main__':
     main()
