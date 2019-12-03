@@ -2,7 +2,7 @@
 import numpy as np
 import scipy.misc as smp
 from PIL import Image
-size = 20
+size = 25000
 dists = []
 global white
 white = np.asarray([255, 255, 255], dtype=np.uint8)
@@ -23,13 +23,13 @@ colors = {1: np.asarray([200,50,50], dtype=np.uint8),
           7: np.asarray([100,50,50], dtype=np.uint8),
           8: np.asarray([0,255,0], dtype=np.uint8)}
 
-def calc_manhattan(x, y):
+def calc_manhattan(y, x):
     c_x = size//2
     c_y = size//2
     return int(abs(c_x-x) + abs(c_y-y))
 
-def insert_pixel(x, y, color):
-    canvas[x, y] = color
+def insert_pixel(y, x, color):
+    canvas[y, x] = color
 
 def check_pixel(x, y, c):
     if np.array_equal(canvas[x, y], black) or np.array_equal(canvas[x, y], grey) or np.array_equal(canvas[x, y], dgrey):
@@ -43,41 +43,41 @@ def check_pixel(x, y, c):
 def up(steps, pos, color):
     i = 0
     for i in range(0, steps+1):
-        if check_pixel(pos[0], pos[1]-i, color):
-            insert_pixel(pos[0], pos[1]-i, color)
-        else:
-            insert_pixel(pos[0], pos[1]-i, white)
-    r = [pos[0], pos[1]-i]
-    return r
-
-def down(steps, pos, color):
-    i = 0
-    for i in range(0, steps+1):
-        if check_pixel(pos[0], pos[1]+i, color):
-            insert_pixel(pos[0], pos[1]+i, color)
-        else:
-            insert_pixel(pos[0], pos[1]+i, white)
-    r = [pos[0], pos[1]+i]
-    return r
-
-def left(steps, pos, color):
-    i = 0
-    for i in range(0, steps+1):
-        if check_pixel(pos[0]-i,pos[1], color):
+        if check_pixel(pos[0]-i, pos[1], color):
             insert_pixel(pos[0]-i, pos[1], color)
         else:
             insert_pixel(pos[0]-i, pos[1], white)
     r = [pos[0]-i, pos[1]]
     return r
 
-def right(steps, pos, color):
+def down(steps, pos, color):
     i = 0
     for i in range(0, steps+1):
-        if check_pixel(pos[0]+i,pos[1], color):
+        if check_pixel(pos[0]+i, pos[1], color):
             insert_pixel(pos[0]+i, pos[1], color)
         else:
             insert_pixel(pos[0]+i, pos[1], white)
     r = [pos[0]+i, pos[1]]
+    return r
+
+def left(steps, pos, color):
+    i = 0
+    for i in range(0, steps+1):
+        if check_pixel(pos[0],pos[1]-i, color):
+            insert_pixel(pos[0], pos[1]-i, color)
+        else:
+            insert_pixel(pos[0], pos[1]-i, white)
+    r = [pos[0], pos[1]-i]
+    return r
+
+def right(steps, pos, color):
+    i = 0
+    for i in range(0, steps+1):
+        if check_pixel(pos[0],pos[1]+i, color):
+            insert_pixel(pos[0], pos[1]+i, color)
+        else:
+            insert_pixel(pos[0], pos[1]+i, white)
+    r = [pos[0], pos[1]+i]
     return r
 
 def draw_line(direction, steps, pos, color):
@@ -99,11 +99,13 @@ def render_file(in_file, expected=None, img=None):
         line_num = 1
         while line:
             l = line.split(',')
-            pos = [size//2,size//2]
+            pos = [size//2, size//2]
             for i in l:
                 direction = i[0]
                 steps = int(i[1:])
                 pos = draw_line(direction, steps, pos, colors[line_num])
+            print(colors[line_num])
+
             line_num += 1
             pos = [size//2, size//2]
             line = f.readline()
@@ -116,24 +118,30 @@ def render_file(in_file, expected=None, img=None):
         print(expected)
     if img:
         Image.fromarray(canvas, mode='RGB').save(img)
+def grey_checkers():
+    for x in range(0, size, 2):
+        for y in range(0, size, 2):
+            canvas[y, x] = grey
+            canvas[y+1, x+1] = grey
+
 
 def main():
+    grey_checkers()
     """
     test_canvas = np.zeros((10, 10, 3), dtype=np.uint8)
     test_canvas[0, 0] = colors[8]
     Image.fromarray(test_canvas, mode="RGB").save('test_canv.png')
     """
-    for x in range(0, size, 2):
-        for y in range(0, size, 2):
-            canvas[x, y] = grey
-            canvas[x+1, y+1] = grey
+    """
+    canvas[3,1] = colors[8]
     render_file("test0", 6, 'test0.png')
-    """    dists.clear()
+    dists.clear()
     render_file("test1", 159, 'test1.png')
     dists.clear()
     render_file("test2", 135, 'test2.png')    
+    """
     dists.clear()
     render_file("input", 'pic1.png')
-    """
+    
 if __name__ == '__main__':
     main()
