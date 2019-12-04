@@ -24,7 +24,6 @@ def check_password(password):
 
 def main():
     num_match = 0 
-    test = {111111: True, 122345: True, 223450: False, 123789: False}
     f = open("input","r")
     content = f.read()
     content = content.rstrip()
