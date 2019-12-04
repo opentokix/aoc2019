@@ -16,6 +16,9 @@ def check_password(password):
     for i in range(1, len(wip)):
         if wip[i] == wip[i-1]:
             flags['same'] = True
+            if wip.count(wip[i]) > 2:
+                flags['same'] = False
+                continue
             break
         else:
             flags['same'] = False
