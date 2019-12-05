@@ -15,6 +15,7 @@ grey = np.asarray([70, 70, 70], dtype=np.uint8)
 dgrey = np.asarray([35, 35, 35], dtype=np.uint8)
 numi = 0
 intersec = {}
+num_steps = 0
 colors = {1: np.asarray([200,50,50], dtype=np.uint8),
           2: np.asarray([75,75,200], dtype=np.uint8),
           3: np.asarray([50,200,50], dtype=np.uint8),
@@ -39,7 +40,9 @@ def check_pixel(x, y, c):
         return True
     else:
         dists.append(calc_manhattan(x, y))
-        numi += numi + 1 
+        global numi
+        numi = numi + 1 
+        global intersec
         intersec[numi] = (y, x)
         return False
 
@@ -85,6 +88,48 @@ def right(steps, pos, color):
             write_intersection(pos[0]-i, pos[1])
     r = [pos[0], pos[1]+i]
     return r
+###
+def lookup(steps, pos, color):
+    i = 0
+    for i in range(0, steps+1):
+        if check_pixel(pos[0]-i, pos[1], color):
+            insert_pixel(pos[0]-i, pos[1], color)
+        else:
+            write_intersection(pos[0]-i, pos[1])
+    r = [pos[0]-i, pos[1]]
+    return r
+
+def lookdown(steps, pos, color):
+    i = 0
+    for i in range(0, steps+1):
+        if check_pixel(pos[0]+i, pos[1], color):
+            insert_pixel(pos[0]+i, pos[1], color)
+        else:
+            write_intersection(pos[0]+i, pos[1])            
+    r = [pos[0]+i, pos[1]]
+    return r
+
+def lookleft(steps, pos, color):
+    i = 0
+    for i in range(0, steps+1):
+        if check_pixel(pos[0],pos[1]-i, color):
+            insert_pixel(pos[0], pos[1]-i, color)
+        else:
+            write_intersection(pos[0]-i, pos[1])
+    r = [pos[0], pos[1]-i]
+    return r
+
+def lookright(steps, pos, color):
+    i = 0
+    for i in range(0, steps+1):
+        if check_pixel(pos[0],pos[1]+i, color):
+            insert_pixel(pos[0], pos[1]+i, color)
+        else:
+            write_intersection(pos[0]-i, pos[1])
+    r = [pos[0], pos[1]+i]
+    return r
+###
+
 
 def draw_line(direction, steps, pos, color):
     if direction == 'U':
@@ -98,6 +143,20 @@ def draw_line(direction, steps, pos, color):
     else:
         print("Unknown direction")
     return pos
+
+def follow_line(direction, steps, pos, coords):
+    if direction == 'U':
+        pos = lookup(steps, pos, coords)
+    elif direction == 'D':
+        pos = lookdown(steps, pos, coords)
+    elif direction == 'L':
+        pos = lookleft(steps, pos, coords)
+    elif direction == 'R':
+        pos = lookright(steps, pos, coords)
+    else:
+        print("Unknown direction")
+    return pos
+
 
 def render_file(in_file, expected=None, img=None):
     with open(in_file) as f:
@@ -119,12 +178,30 @@ def render_file(in_file, expected=None, img=None):
     numbers = list(filter(lambda num: num != 0, dists))
     numbers.sort()
     print("file: ", in_file, "result: ", min(numbers))
-    print(intersec)
     del numbers
     if expected:
         print(expected)
     if img:
         Image.fromarray(canvas, mode='RGB').save(img)
+
+def follow_lines(in_file, intersec):
+    with open(in_file) as f:
+        line = f.readline()
+        line_num = 1
+        while line:
+            l = line.split(',')
+            pos = [size//2, size//2]
+            for i in l:
+                direction = i[0]
+                steps = int(i[1:])
+                pos = follow_line(direction, steps, pos, colors[line_num])
+            print(colors[line_num])
+
+            line_num += 1
+            pos = [size//2, size//2]
+            line = f.readline()
+    canvas[size//2, size//2] = colors[8]
+
 
 def grey_checkers():
     for x in range(0, size, 2):
@@ -150,6 +227,8 @@ def main():
     """
     dists.clear()
     render_file("input")
-    
+    lengths = follow_lines("input")
+
+
 if __name__ == '__main__':
     main()
